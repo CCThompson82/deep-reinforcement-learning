@@ -44,8 +44,9 @@ def generate_sarsa_step(env, Q, state_0, action_0, epsilon, alpha, gamma):
     return Q, state_1, action_1, terminal_status, info
 
 
-def generate_q_learning_step(env, Q, state_0, action_0, alpha, gamma):
+def generate_q_learning_step(env, Q, state_0, action_0, epsilon, alpha, gamma):
     state_1, reward0, episode_finished, info = env.step(a=action_0)
+    # evaluate the greediest action
     action_1 = get_greedy_action(Q, state_1)
 
     G1 = Q[state_1][action_1]
@@ -55,16 +56,20 @@ def generate_q_learning_step(env, Q, state_0, action_0, alpha, gamma):
     delta_Q = (reward0 + discounted_return - current_value_estimate)
     Q[state_0][action_0] = current_value_estimate + (alpha * delta_Q)
 
+    # but provide the epsilon greedy action
+    action_1 = get_greedy_epsilon_action(Q, state_1, epsilon, env.nA)
+
     return Q, state_1, action_1, episode_finished, info
 
 
-def run_q_learning_episode(env, Q, alpha, gamma):
+def run_q_learning_episode(env, Q, epsilon, alpha, gamma):
     state_0 = env.reset()
     action_0 = get_greedy_action(Q, state_0)
 
     while True:
         Q, state_1, action_1, episode_finished, info = \
-            generate_q_learning_step(env, Q, state_0, action_0, alpha, gamma)
+            generate_q_learning_step(
+                env, Q, state_0, action_0, epsilon, alpha, gamma)
 
         state_0 = state_1
         action_0 = action_1
