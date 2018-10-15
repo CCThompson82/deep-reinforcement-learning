@@ -1,7 +1,14 @@
+
+import sys
+import os
+ROOT_DIR = os.environ['ROOT_DIR']
+sys.path.append(ROOT_DIR)
+
 import numpy as np
 from collections import defaultdict
 from src.utils.policies import policy_utils
 from src.utils.episodes import sarsa as sarsa_utils
+
 
 class Agent:
 
@@ -13,14 +20,14 @@ class Agent:
         - nA: number of actions available to the agent
         """
         self.nA = nA
-        self.Q = defaultdict(lambda: np.zeros(self.nA))
+        self.Q = defaultdict(lambda: np.ones(self.nA))
         self.episodes = 0
 
-        self.epsilon_config = {'decay_rate': 1e-4,
-                               'inflection_episode': 5000,
-                               'minimum_epsilon': 0.01,
-                               'ceiling_epsilon': 1.0}
-        self.alpha = 1e-3
+        self.epsilon_config = {'decay_rate': 1e-2,
+                               'inflection_episode': 1000,
+                               'minimum_epsilon': 0.00002,
+                               'ceiling_epsilon': 0.05}
+        self.alpha = 5e-2
         self.gamma = 0.9
 
     @property
@@ -31,7 +38,7 @@ class Agent:
             x50=self.epsilon_config['inflection_episode'],
             floor=self.epsilon_config['minimum_epsilon'],
             ceil=self.epsilon_config['ceiling_epsilon'])
-        return epsilon
+        return np.round(epsilon, 5)
 
     def select_action(self, state):
         """ Given the state, select an action.
@@ -70,4 +77,6 @@ class Agent:
                                                         alpha=self.alpha,
                                                         gamma=self.gamma,
                                                         nb_A=self.nA)
+        if done:
+            self.episodes += 1
 
