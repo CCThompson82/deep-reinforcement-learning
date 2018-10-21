@@ -64,6 +64,26 @@ def create_tiling_grid(low, high, bins=(10, 10), offsets=(0.0, 0.0)):
         A list of arrays containing split points for each dimension.
     """
     grid = create_uniform_grid(low, high, bins)
-
     tiling = [grid[idx] + offset for idx, offset in enumerate(offsets)]
     return tiling
+
+
+def tile_encode(sample, tilings, flatten=False):
+    """Encode given sample using tile-coding.
+
+    Parameters
+    ----------
+    sample : array_like
+        A single sample from the (original) continuous space.
+    tilings : list
+        A list of tilings (grids), each produced by create_tiling_grid().
+    flatten : bool
+        If true, flatten the resulting binary arrays into a single long vector.
+
+    Returns
+    -------
+    encoded_sample : list or array_like
+        A list of binary vectors, one for each tiling, or flattened into one.
+    """
+    encoded_sample = [discretize(sample, grid) for grid in tilings]
+    return np.concatenate(encoded_sample) if flatten else encoded_sample
