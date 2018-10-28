@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM nvidia/cudagl:9.2-devel-ubuntu18.04
 
 ################################################################################
 #  Install python3.6 and pip
