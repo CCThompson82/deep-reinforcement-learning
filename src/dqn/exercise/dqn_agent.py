@@ -15,6 +15,7 @@ TAU = 1e-3              # for soft update of target parameters
 LR = 5e-4               # learning rate 
 UPDATE_EVERY = 4        # how often to update the network
 
+print('Cuda is available: {}'.format(torch.cuda.is_available()))
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent():
@@ -87,6 +88,45 @@ class Agent():
 
         ## TODO: compute and minimize the loss
         "*** YOUR CODE HERE ***"
+        ########################################################################
+        # Get max predicted Q values (for next states) from target model
+        # NOTE: Somehow qnetwork is both a class and a function.  Using it as a
+        # function is the same thing as calling QNetwork().forward(next_states)
+
+        # Inline steps:
+        # 1) detach - ??
+        # 2) max(dim=1) - take the maximum q value (value, index) for each next_state
+        # 3) [0] - take the value, not the index
+        # 4) unsqueeze - add another dimension to reshape the tensor
+
+        Q_targets_next = self.qnetwork_target(next_states).detach().max(dim=1)[0].unsqueeze(dim=1)
+        ########################################################################
+
+        ########################################################################
+        # Compute Q targets for current states
+        # for the actions that are not terminal, calculate the new target q value based on the
+        # reward for s_t and the discounted estimated q value for S_t+1
+        Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
+        ########################################################################
+
+        ########################################################################
+        # Get expected Q values from local model
+        # What were the previous q value estimations?
+
+        # Inline steps
+        # 1) gather(dim=1, actions) - take the q value for each state | action index
+        Q_expected = self.qnetwork_local(states).gather(1, actions)
+        ########################################################################
+
+        ########################################################################
+        # Compute loss
+        loss = F.mse_loss(Q_expected, Q_targets)
+        # Minimize the loss
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        ########################################################################
+
 
         # ------------------- update target network ------------------- #
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
