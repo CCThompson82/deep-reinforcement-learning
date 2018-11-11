@@ -32,9 +32,10 @@ RUN apt-get update && apt-get install -y \
 ################################################################################
 #  Install python dependencies
 ################################################################################
-WORKDIR /workdir
-COPY ./src/python/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
+WORKDIR /usr/lib
+COPY ./src/python /usr/lib/install_requirements
+RUN cd /usr/lib/install_requirements && \
+    pip3 install -e .
 
 ################################################################################
 #  Install openAI gym
