@@ -1,14 +1,15 @@
 FROM nvidia/cudagl:9.2-devel-ubuntu18.04
 
 ################################################################################
-#  Install python3.6 and pip
+#  Install python3.6 and pip and common dependencies
 ################################################################################
 RUN apt-get update && apt-get install -y \
   sudo \
   git \
+  wget \
+  unzip \
   python3.6 \
-  python3-pip \
-  python3-dev
+  python3-pip
 
 RUN pip3 install --upgrade pip
 
@@ -32,9 +33,10 @@ RUN apt-get update && apt-get install -y \
 ################################################################################
 #  Install python dependencies
 ################################################################################
-WORKDIR /workdir
-COPY ./src/python/requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
+WORKDIR /usr/lib
+COPY ./src/python /usr/lib/install_requirements
+RUN cd /usr/lib/install_requirements && \
+    pip3 install -e .
 
 ################################################################################
 #  Install openAI gym
@@ -46,13 +48,6 @@ RUN git clone https://github.com/openai/gym.git && \
 
 
 ################################################################################
-#  add user to docker group
-################################################################################
-#ARG UID
-#RUN useradd docker -l -u $UID -s /bin/bash -m
-#USER docker
-
-################################################################################
 #  Setup jupyter
 ################################################################################
 WORKDIR /workdir
@@ -60,6 +55,13 @@ COPY ./docker/run_jupyter.sh /run_jupyter.sh
 COPY ./docker/jupyter_notebook_config.py /root/.jupyter/
 RUN chmod +x /run_jupyter.sh
 ENV PASSWORD='zeus'
+
+################################################################################
+#  add user to docker group
+################################################################################
+#ARG UID
+#RUN useradd docker -l -u $UID -s /bin/bash -m
+#USER docker
 
 ################################################################################
 #  Setup ipython kernel
