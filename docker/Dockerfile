@@ -59,9 +59,9 @@ ENV PASSWORD='zeus'
 ################################################################################
 #  add user to docker group
 ################################################################################
-ARG UID
-RUN useradd docker -l -u $UID -s /bin/bash -m
-USER docker
+#ARG UID
+#RUN useradd docker -l -u $UID -s /bin/bash -m
+#USER docker
 
 ################################################################################
 #  Setup ipython kernel
