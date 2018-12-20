@@ -20,3 +20,4 @@ notebook
 Sphinx
 flake8
 seaborn
+tqdm
